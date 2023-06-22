@@ -1,23 +1,15 @@
 import logging
-import datetime
-
-from aiogram import Bot, Dispatcher, types
+import handlers
+from aiogram import types, executor
 from aiogram.utils import executor
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
-
-from test import add_user, get_user_id
-from config import TOKEN
-
-
-
-
-
+from test import add_user, get_user_id, add_message
+from loader import dp
 
 
 
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token=TOKEN)
-dp = Dispatcher(bot)
+# bot = Bot(token=TOKEN)
+# dp = Dispatcher(bot)
 
 
 @dp.message_handler(commands='start')
@@ -28,16 +20,29 @@ async def start(message: types.Message):
     text_message = message.text
     date = message.date
 
-    await message.answer(f'Салам алейкум\n\n{message}\n\n{type(message.date)}')
 
+
+    await message.answer(f'Салам алейкум\n\n{message}')
 
     if get_user_id(telegram_id) is None:  # Проверка наличия пользователя в БД
         add_user(telegram_id, user_name, full_name, date)
         print('dsssdsdd')
 
+    add_message(message)  # Adding a new message to the DB
 
 
+@dp.message_handler(commands='add_new_product')
+async def add_new_product(message: types.Message):
+    await message.answer(f'Введите название наименование продукта')
 
+@dp.message_handler()
+async def random_message(message: types.Message):
+    await message.answer(f'рандом')
+    telegram_id = message.chat.id
+    date = message.date
+    text_message = message.text
+
+    add_message(message)
 
 
 

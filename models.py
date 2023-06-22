@@ -1,12 +1,8 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, DECIMAL, Boolean
-from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, DECIMAL, Boolean
+from loader import engine, Base
+from sqlalchemy.orm import relationship
 from datetime import datetime
 
-engine = create_engine('sqlite:///DataBase.db')
-Session = sessionmaker(bind=engine)
-session = Session()
-Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'users'
@@ -17,37 +13,43 @@ class User(Base):
     registration_date = Column(DateTime, default=datetime.utcnow)
     balance = Column(DECIMAL)
     actyvity = Column(Boolean)  # Оплачен/активирован ли аккаунт. По умолчания False
-    messages = relationship("Message",  back_populates="user", cascade="all, delete-orphan")
-    orders = relationship("Order", back_populates="user", cascade="all, delete-orphan")
+    messages = relationship("Messages",  back_populates="user")
+    orders = relationship("Order", back_populates="user")
 
-
-class Message(Base):
+class Messages(Base):
     __tablename__ = 'messages'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.telegram_id'))
+    telegram_id = Column(Integer, ForeignKey('users.telegram_id'))
     date_message = Column(DateTime, default=datetime.utcnow)
     text_message = Column(String)
     user = relationship("User", back_populates="messages")
 
+class Category(Base):
+    __tablename__ = 'category'
+    id = Column(Integer, primary_key=True)
+    category_name = Column(String, unique=True)
+    products = relationship("Product", back_populates="category")
 
 class Product(Base):
     __tablename__ = 'products'
     id = Column(Integer, primary_key=True)
+    category_id = Column(Integer, ForeignKey('category.id'))
     product_name = Column(String)
     product = Column(String) # Продуктом является цифровой ключ
     price = Column(DECIMAL)
-    order_items = relationship("Order_items", back_populates="product", cascade="all, delete-orphan")  # Changed 'products' to 'product'
-
+    amount = Column(Integer)
+    order_items = relationship("Order_items", back_populates="product")
+    category = relationship("Category", back_populates="products")
 
 class Order(Base):  # Корзина
     __tablename__ = 'orders'
     order_id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.telegram_id'))
+    telegram_id = Column(Integer, ForeignKey('users.telegram_id'))
     user = relationship("User", back_populates="orders")
     date_order = Column(DateTime, default=datetime.utcnow)
     status_order = Column(Boolean)
-    order_items = relationship("Order_items", back_populates="order", cascade="all, delete-orphan")
-    payments = relationship("Payment", back_populates="order", cascade="all, delete-orphan")
+    order_items = relationship("Order_items", back_populates="order")
+    payments = relationship("Payment", back_populates="order")
 
 class Order_items(Base):  # Элементы корзины
     __tablename__ = 'order_items'
@@ -58,7 +60,6 @@ class Order_items(Base):  # Элементы корзины
     order = relationship("Order", back_populates="order_items")
     amount = Column(Integer)
 
-
 class Payment(Base):
     __tablename__ = 'payments'
     payment_id = Column(Integer, primary_key=True)
@@ -67,7 +68,6 @@ class Payment(Base):
     amount_to_pay = Column(DECIMAL)
     payment_method = Column(String)
     status_payment = Column(Boolean)
-
 
 
 Base.metadata.create_all(engine)
