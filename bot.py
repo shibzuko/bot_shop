@@ -1,10 +1,9 @@
 import logging
-import handlers
-from aiogram import types, executor
+from aiogram import types
 from aiogram.utils import executor
-from test import add_user, get_user_id, add_message
+from utils.test import add_user, get_user_id, add_message
 from loader import dp
-
+import handlers
 
 
 logging.basicConfig(level=logging.INFO)

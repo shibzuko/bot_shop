@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from data import config
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -21,3 +21,4 @@ Base = declarative_base()
 
 # Создание dispatcher с использованием MemoryStorage
 dp = Dispatcher(bot, storage=MemoryStorage())
+
