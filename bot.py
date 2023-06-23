@@ -4,6 +4,7 @@ from aiogram.utils import executor
 from utils.test import add_user, get_user_id, add_message
 from loader import dp
 import handlers
+import keyboards
 
 
 logging.basicConfig(level=logging.INFO)
